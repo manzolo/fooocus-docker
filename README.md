@@ -1,5 +1,7 @@
 # fooocus-docker
 
+[![CI](https://github.com/manzolo/fooocus-docker/actions/workflows/ci.yml/badge.svg)](https://github.com/manzolo/fooocus-docker/actions/workflows/ci.yml)
+
 A minimal Docker Compose setup for running [Fooocus](https://github.com/lllyasviel/Fooocus) — an image generation tool built on Stable Diffusion XL — with a persistent data directory for models, configuration, and outputs.
 
 This is just deployment glue. All the heavy lifting is done by the upstream `ghcr.io/lllyasviel/fooocus` image.

@@ -1,0 +1,82 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    name: Validate config
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate docker-compose.yml
+        run: docker compose config --quiet
+
+      - name: Validate config.txt is valid JSON
+        run: jq empty fooocus-data/config.txt
+
+      - name: Dry-run Make targets
+        run: |
+          make -n setup
+          make -n up
+          make -n down
+          make -n update
+
+      - name: Confirm help target lists every documented target
+        run: |
+          expected="help setup up down restart logs ps pull update shell config volume-path clean purge"
+          help_out=$(make help | sed -E 's/\x1b\[[0-9;]*m//g')
+          for t in $expected; do
+            echo "$help_out" | grep -qE "^[[:space:]]+${t}[[:space:]]" || { echo "Missing target in help: $t"; exit 1; }
+          done
+
+  smoke-test:
+    name: Smoke test (CPU-only)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    needs: validate
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Free up disk space
+        run: |
+          df -h /
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
+          sudo docker image prune -af || true
+          df -h /
+
+      - name: Pull Fooocus image
+        run: docker pull ghcr.io/lllyasviel/fooocus
+
+      - name: Start Fooocus on CPU
+        run: |
+          docker run -d --name fooocus \
+            -p 7865:7865 \
+            -e CMDARGS="--listen --always-cpu --disable-offload-from-vram" \
+            ghcr.io/lllyasviel/fooocus
+
+      - name: Wait for HTTP response on :7865
+        run: |
+          for i in $(seq 1 120); do
+            if curl -sf -o /dev/null http://localhost:7865; then
+              echo "Fooocus responded after ${i} attempts (~$((i*5))s)"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::Fooocus did not respond within 10 minutes"
+          exit 1
+
+      - name: Container logs (always)
+        if: always()
+        run: docker logs fooocus 2>&1 | tail -200 || true
+
+      - name: Tear down
+        if: always()
+        run: docker rm -f fooocus || true
