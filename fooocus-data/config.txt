@@ -1,0 +1,16 @@
+{
+    "path_checkpoints": "/content/data/models/checkpoints/",
+    "path_loras": "/content/data/models/loras/",
+    "path_embeddings": "/content/data/models/embeddings/",
+    "path_vae_approx": "/content/data/models/vae_approx/",
+    "path_vae": "/content/app/models/vae",
+    "path_upscale_models": "/content/data/models/upscale_models/",
+    "path_inpaint": "/content/data/models/inpaint/",
+    "path_controlnet": "/content/data/models/controlnet/",
+    "path_clip_vision": "/content/data/models/clip_vision/",
+    "path_fooocus_expansion": "/content/data/models/prompt_expansion/fooocus_expansion/",
+    "path_wildcards": "/content/app/wildcards",
+    "path_safety_checker": "/content/app/models/safety_checker",
+    "path_sam": "/content/app/models/sam",
+    "path_outputs": "/content/app/outputs/"
+}
