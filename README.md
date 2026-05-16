@@ -15,18 +15,32 @@ This is just deployment glue. All the heavy lifting is done by the upstream `ghc
 ```bash
 git clone https://github.com/manzolo/fooocus-docker.git
 cd fooocus-docker
-docker compose up -d
+make setup
 ```
 
-Open <http://localhost:7865> in your browser. On the first run Fooocus will download the default SDXL checkpoint into the `fooocus-data` volume — give it a few minutes.
+Open <http://localhost:7865> in your browser. On the first run Fooocus will download the default SDXL checkpoint into the `fooocus-data` volume — give it a few minutes (`make logs` to watch).
 
-Useful commands:
+## Make targets
 
-```bash
-docker compose logs -f app                 # follow logs
-docker compose down                        # stop
-docker compose pull && docker compose up -d   # update to the latest upstream image
-```
+| Target | What it does |
+| --- | --- |
+| `make setup` | Pull the upstream image and start the stack (first-time install) |
+| `make up` | Start the container in the background |
+| `make down` | Stop and remove the container (the data volume is preserved) |
+| `make restart` | Restart the container |
+| `make logs` | Follow container logs |
+| `make ps` | Show container status |
+| `make pull` | Pull the latest upstream image |
+| `make update` | Pull latest image and recreate the container |
+| `make shell` | Open a bash shell inside the running container |
+| `make config` | Print the active `config.txt` from the volume |
+| `make volume-path` | Show where the `fooocus-data` volume lives on the host |
+| `make clean` | Stop and remove the container (keeps models and outputs) |
+| `make purge` | **Destructive.** Remove the container *and* the data volume — deletes every downloaded model. Asks for confirmation. |
+
+Run `make` (or `make help`) with no target to see the same list.
+
+All targets are thin wrappers around `docker compose`; nothing stops you from running the raw commands directly if you prefer.
 
 ## How it's wired up
 
